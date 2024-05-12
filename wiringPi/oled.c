@@ -71,6 +71,15 @@ int oled_init(struct display_info *disp) {
 	//	status = mlockall(MCL_CURRENT | MCL_FUTURE);
 	//	if (status < 0)
 	//		return status;
+	
+	//test
+	printf("oled test allon!");
+	payload.size = sizeof(display_allon_config);
+	payload.array = display_allon_config;
+
+	status = oled_send(disp, &payload);
+	if (status < 0)
+		return 666;
 
 	payload.size = sizeof(display_config);
 	payload.array = display_config;

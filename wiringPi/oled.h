@@ -48,6 +48,10 @@
 // SH1106 Display
 #define OLED_SET_PAGE_ADDRESS            0xB0
 
+static const unsigned char display_allon_config[] = {
+	OLED_CTRL_BYTE_CMD_STREAM,
+	OLED_CMD_DISPLAY_ALLON
+};
 
 static const unsigned char display_config[] = {
 	OLED_CTRL_BYTE_CMD_STREAM,
