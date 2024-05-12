@@ -86,14 +86,17 @@ int main(int argc, char **argv) {
 		show_error(1, e);
 	} else {
 		e = oled_init(&disp);
-	if (e < 0) {
-		show_error(2, e);
-	} else {
+		
+	#if 0	
+		if (e < 0) {
+			show_error(2, e);
+		} else {
 		printf("---------start--------\n");
 		if (oled_demo(&disp) < 0)
 			show_error(3, 777);
 			printf("----------end---------\n");
 		}
+	#endif
 	}
 
 	return 0;

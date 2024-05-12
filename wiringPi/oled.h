@@ -50,6 +50,8 @@
 
 static const unsigned char display_allon_config[] = {
 	OLED_CTRL_BYTE_CMD_STREAM,
+	OLED_CMD_DISPLAY_OFF,
+	OLED_CMD_DISPLAY_ON,
 	OLED_CMD_DISPLAY_ALLON
 };
 
