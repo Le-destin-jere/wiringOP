@@ -12,6 +12,7 @@
 
 #include <stdint.h>
 #include "font.h"
+#include "oled_icon.h"
 
 #define OLED_I2C_ADDR                   0x3c
 
@@ -124,10 +125,14 @@ extern int oled_close       (struct display_info* disp);
 extern int oled_open        (struct display_info* disp, char* filename);
 extern int oled_send        (struct display_info* disp, struct sized_array* payload);
 extern int oled_init        (struct display_info* disp);
+extern int oled_clear_buffer(struct display_info *disp);
 extern int oled_send_buffer (struct display_info* disp);
 extern void oled_clear(struct display_info *disp);
 extern void oled_putstr(struct display_info *disp, uint8_t line, uint8_t *str);
 extern void oled_putpixel(struct display_info *disp, uint8_t x, uint8_t y, uint8_t on);
 extern void oled_putstrto(struct display_info *disp, uint8_t x, uint8_t y, char *str);
+extern void oled_draw_img(struct display_info *disp, int8_t x, int8_t y, int8_t height, uint8_t width, const uint8_t *img);
+extern void oled_putstrto2(struct display_info *disp, uint8_t x, uint8_t y, char *str);
+
 
 #endif // OLED_H

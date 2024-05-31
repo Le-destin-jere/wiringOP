@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "stdint.h": "c",
+        "font.h": "c",
+        "wiringpii2c.h": "c"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
+}

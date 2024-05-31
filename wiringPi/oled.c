@@ -19,7 +19,6 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <stdio.h>
-
 // real-time features
 #include <sys/mman.h>
 #include <sched.h>
@@ -27,7 +26,6 @@
 #include "oled.h"
 #include "font.h"
 #include <wiringPiI2C.h>
-
 
 int oled_close(struct display_info *disp) {
 	if (close(disp->file) < 0)
@@ -62,25 +60,7 @@ int oled_init(struct display_info *disp) {
 	int status = 0;
 	struct sized_array payload;
 
-	//	sch.sched_priority = 49;
-	//
-	//	status = sched_setscheduler(0, SCHED_FIFO, &sch);
-	//	if (status < 0)
-	//		return status;
-	//
-	//	status = mlockall(MCL_CURRENT | MCL_FUTURE);
-	//	if (status < 0)
-	//		return status;
-	
-	//test
-	printf("oled test allon!");
-	payload.size = sizeof(display_allon_config);
-	payload.array = display_allon_config;
-
-	status = oled_send(disp, &payload);
-	if (status < 0)
-		return 666;
-
+	printf("oled init enter.");
 	payload.size = sizeof(display_config);
 	payload.array = display_config;
 
@@ -106,6 +86,12 @@ int oled_send_buffer(struct display_info *disp) {
 		payload.array = packet;
 		oled_send(disp, &payload);
 	}
+	return 0;
+}
+// clear buffer
+int oled_clear_buffer(struct display_info *disp) 
+{
+	memset(disp->buffer, 0, sizeof(disp->buffer));
 	return 0;
 }
 
@@ -170,3 +156,73 @@ void oled_putstrto(struct display_info *disp, uint8_t x, uint8_t y, char *str) {
 	}
 }
 
+
+unsigned char oled_swap_bits(unsigned char c) 
+{
+    c = ((c >> 4) & 0x0F) | ((c & 0x0F) << 4);
+    c = ((c >> 2) & 0x33) | ((c & 0x33) << 2);
+    c = ((c >> 1) & 0x55) | ((c & 0x55) << 1);
+    return c;
+}
+// draw img to the buffer at xy
+void oled_draw_img(struct display_info *disp, int8_t x, int8_t y, int8_t height, uint8_t width, const uint8_t *img) 
+{
+	int i,j;
+	int index = 0;
+	uint8_t abyte;
+	int8_t x_temp         = x;
+	uint8_t pageId        = y/8;
+	uint8_t bitOffset     = y%8;
+	uint8_t remain_line   = (height+7)/8;
+
+	while(remain_line)
+	{
+		for(i=0; i < width; i++){
+			abyte = img[index++];
+			if (x_temp >=0 && x_temp < 128-2) {
+				disp->buffer[pageId][x_temp] |= abyte<<bitOffset;
+				if(bitOffset && pageId+1 <= 8){
+					//abyte = oled_swap_bits(abyte);
+					disp->buffer[pageId+1][x_temp] = abyte>>(8-bitOffset);
+				}
+			}
+			x_temp++;
+		}
+		//next page
+		remain_line--;
+		x_temp = x;
+		if(++pageId > 8){
+			break;
+		}
+	};
+
+}
+
+// put string to the buffer at xy
+void oled_putstrto2(struct display_info *disp, uint8_t x, uint8_t y, char *str) 
+{
+	uint16_t index;
+	uint8_t abyte,i;
+	uint8_t fwidth    = disp->font.width;
+	uint8_t fheight   = disp->font.height;
+	uint8_t foffset   = disp->font.offset;
+	uint8_t fspacing  = disp->font.spacing;
+	uint8_t str_len   = strlen(str);
+	uint8_t* data_ptr = NULL;
+	if(y > 64 || x > 128){
+		return;
+	}
+	for(i=0; i < str_len; i++){
+		abyte = str[i];
+		if(abyte-foffset<0){
+			continue;
+		}
+		index = (abyte - foffset)*(fwidth*fheight/8);
+		data_ptr = &(disp->font.data[index]);
+		//printf("abyte:%d foffset:%d\r\n", abyte, foffset);
+		oled_draw_img(disp, x, y, fheight, fwidth, data_ptr);
+		x+=fwidth;
+		x+=fspacing;
+	}
+
+}
